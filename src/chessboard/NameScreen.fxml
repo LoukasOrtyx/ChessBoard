@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.image.*?>
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane fx:id="MainPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="132.0" prefWidth="223.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="chessboard.NameScreenController">
+   <children>
+      <ImageView fitHeight="254.0" fitWidth="251.0" layoutX="-14.0" layoutY="-59.0" pickOnBounds="true" preserveRatio="true">
+         <image>
+            <Image url="@../Images/background.jpg" />
+         </image>
+      </ImageView>
+      <Label layoutX="8.0" layoutY="30.0" prefHeight="17.0" prefWidth="83.0" text="Jogador 1:" />
+      <TextField fx:id="jogador1" layoutX="86.0" layoutY="26.0" prefHeight="25.0" prefWidth="114.0" />
+      <Label layoutX="8.0" layoutY="72.0" prefHeight="17.0" prefWidth="83.0" text="Jogador 2:" />
+      <TextField fx:id="jogador2" layoutX="86.0" layoutY="68.0" prefHeight="25.0" prefWidth="114.0" />
+      <Button fx:id="button" layoutX="80.0" layoutY="99.0" mnemonicParsing="false" onAction="#ValidateNames" text="Começar" />
+      <Label fx:id="Warning" layoutX="80.0" layoutY="6.0" prefHeight="17.0" prefWidth="83.0" />
+   </children>
+</AnchorPane>
