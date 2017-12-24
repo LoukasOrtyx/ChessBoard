@@ -57,7 +57,7 @@ public class House extends Rectangle {
     private Coordinate Point;
     private ImagePattern background;
     
-    public House(int x, int y, int Width, int Height, int Colour) {
+    public House(int x, int y, double Width, double Height, int Colour) {
         
         super(Width, Height);
 
