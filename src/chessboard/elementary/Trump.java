@@ -24,7 +24,7 @@ import java.util.List;
      
      private int limit;
 
-    public Trump(int x, int y, int color, int ImageSize) {
+    public Trump(int x, int y, int color, double ImageSize) {
         
         super("/Images/trump.png");
          

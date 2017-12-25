@@ -52,7 +52,7 @@ public class Jhin extends Piece {
         return null;
     }
     
-    public Jhin(int x, int y, int color, int ImageSize) {
+    public Jhin(int x, int y, int color, double ImageSize) {
         
         super("/Images/jhin.png");
         

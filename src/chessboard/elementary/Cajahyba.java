@@ -15,7 +15,7 @@ import java.util.List;
 public class Cajahyba extends Piece {
     
 
-    public Cajahyba(int x, int y, int color, int ImageSize) {
+    public Cajahyba(int x, int y, int color, double ImageSize) {
         
         super("Images/C.png");
         

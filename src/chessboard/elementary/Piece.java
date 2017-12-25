@@ -8,6 +8,7 @@ package chessboard.elementary;
 
 import java.util.List;
 import javafx.scene.Cursor;
+import javafx.scene.effect.InnerShadow;
 import javafx.scene.image.ImageView;
 
 /**
@@ -19,11 +20,11 @@ abstract class Piece extends ImageView {
     /**
      * @return the ImageSize
      */
-    public int getImageSize() {
+    public double getImageSize() {
         return ImageSize;
     }
 
-    public void setImageSize(int ImageSize) {
+    public void setImageSize(double ImageSize) {
         this.ImageSize = ImageSize;
     }
 
@@ -48,14 +49,28 @@ abstract class Piece extends ImageView {
         this.Point = c;
     }
     
+    public void setShadow() {
+        this.Shadow = new InnerShadow();
+        
+        this.Shadow.setOffsetX(2.0f);
+        this.Shadow.setOffsetY(2.0f);
+    }
+    
+    public InnerShadow getShadow() {
+        return this.Shadow;
+    }
+    
+    
+    private InnerShadow Shadow;
     private Coordinate Point;
-    private int ImageSize;
+    private double ImageSize;
     private int Color;
 
     public Piece(String Image_url) {
         
         super(Image_url);
         setCursor(Cursor.HAND);
+        setEffect(Shadow);
     }
     
     abstract List<List<Coordinate>> PlotPaths();
