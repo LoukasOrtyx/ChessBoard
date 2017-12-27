@@ -36,6 +36,7 @@ public class Cajahyba extends Piece {
         super("Images/C.png");
         
         setImageSize(ImageSize - 5);
+        
         setTranslateX(2.5);
         setFitHeight(getImageSize());
         setFitWidth(getImageSize());
