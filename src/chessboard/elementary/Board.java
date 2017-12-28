@@ -4,15 +4,19 @@ import chessboard.songPlayer;
 import java.util.ArrayList;
 import java.util.List;
 import javafx.event.EventHandler;
+import javafx.scene.Cursor;
 import javafx.scene.Node;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.effect.Glow;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.RowConstraints;
+import javafx.scene.paint.Color;
 import javafx.scene.paint.ImagePattern;
 import javafx.stage.Window;
 
@@ -132,14 +136,6 @@ public class Board {
 
     public void setPieceEntered(EventHandler PieceEntered) {
         this.PieceEntered = PieceEntered;
-    }
-
-    public EventHandler getPieceExited() {
-        return PieceExited;
-    }
-
-    public void setPieceExited(EventHandler PieceExited) {
-        this.PieceExited = PieceExited;
     }
 
     public ImagePattern getGreen() {
@@ -480,60 +476,115 @@ public class Board {
             
             setPriorUnit((Piece) event.getSource());
             
-            setSong(getPriorUnit().getLMB());
-            setWrong(getPriorUnit().getWrong());
+            if (((MouseEvent) event).getButton() == MouseButton.SECONDARY) {
+                
+                Propagate = false;
+                
+                if (getPriorUnit() instanceof Jhin) {
+                    
+                    
+                    
+                } else {
+                    
+                    
+                }
+                
+            } else {
+                
+
+                setSong(getPriorUnit().getLMB());
+                setWrong(getPriorUnit().getWrong());
+
+                if (getPriorUnit().getColor() != Turn) {
+
+                    Propagate = false;
+                    
+                    getPriorUnit().toFront();
+
+                    getMarker().setText("Vez de: " + getUser()[Turn].getName());
+                    getMarker().setTextFill(Color.RED);
+
+                    getMarker().setLayoutX(((MouseEvent) event).getSceneX() - 30);
+                    getMarker().setLayoutY(((MouseEvent) event).getSceneY() + 30);
+
+                    getMarker().toFront();
+                    Effects.BlinkLabel(getMarker());
+
+                    getMedia().playSong(getWrong());
+                } else {
+
+                    getMedia().playSong(getSong());
+
+                    int x = getPriorUnit().getPoint().getX();
+                    int y = getPriorUnit().getPoint().getY();
+
+                    setPriorSquare(this.Square[x][y]);
+                    setGlowSquare(this.Square[x][y]);
+
+                    getEffects().onSelection(getPriorUnit());
+
+                    double dx = ((MouseEvent) event).getSceneX();
+                    double dy = ((MouseEvent) event).getSceneY();
+
+                    setScene(new Coordinate(dx, dy));
+                    setTranslate(new Coordinate(getPriorUnit().getTranslateX(), getPriorUnit().getTranslateY()));
+
+                    ShowMotions(getPriorUnit());
+                }
+            }
             
-            getMedia().playSong(getSong());
-            
-            int x = getPriorUnit().getPoint().getX();
-            int y = getPriorUnit().getPoint().getY();
-            
-            setPriorSquare(this.Square[x][y]);
-            setGlowSquare(this.Square[x][y]);
-            
-            getEffects().onSelection(getPriorUnit());
-            
-            double dx = ((MouseEvent) event).getSceneX();
-            double dy = ((MouseEvent) event).getSceneY();
-            
-            setScene(new Coordinate(dx, dy));
-            setTranslate(new Coordinate(getPriorUnit().getTranslateX(), getPriorUnit().getTranslateY()));
-            
-            ShowMotions(getPriorUnit());
+            event.consume();
         });
         
         setPieceDragged((event) -> {
             
-            double dx = ((MouseEvent) event).getSceneX();
-            double dy = ((MouseEvent) event).getSceneY();
+            if (Propagate == true) {
             
-            double offsetX = dx - getScene().getDx();
-            double offsetY = dy - getScene().getDy();
-            
-            House Square = FindSquare(dx, dy);
-            
-            if(Square !=  getGlowSquare()) {
-                
-                getGlowSquare().getShadow().setInput(getGlowSquare().getGlow());
-                setGlowSquare(Square);
-            }
-            
-            if(HouseIsValid(getGlowSquare())) {
-                
-                setLandable(true);
-                getGlowSquare().getShadow().setInput(new Glow(1));
+                double dx = ((MouseEvent) event).getSceneX();
+                double dy = ((MouseEvent) event).getSceneY();
+
+                double offsetX = dx - getScene().getDx();
+                double offsetY = dy - getScene().getDy();
+
+                getPriorUnit().setCursor(Cursor.CLOSED_HAND);
+
+                House Square = FindSquare(dx, dy);
+
+                if (Square != getGlowSquare()) {
+
+                    getGlowSquare().getShadow().setInput(getGlowSquare().getGlow());
+                    setGlowSquare(Square);
+                }
+
+                if (HouseIsValid(getGlowSquare())) {
+
+                    setLandable(true);
+                    getGlowSquare().getShadow().setInput(new Glow(1));
+                } else {
+                    setLandable(false);
+                }
+
+                double newTranslateX = offsetX + getTranslate().getDx();
+                double newTranslateY = offsetY + getTranslate().getDy();
+
+                getPriorUnit().setTranslateX(newTranslateX);
+                getPriorUnit().setTranslateY(newTranslateY);
             } else {
-                setLandable(false);
+                
+                Propagate = true;
             }
-            
-            double newTranslateX = offsetX + getTranslate().getDx();
-            double newTranslateY = offsetY + getTranslate().getDy();
-            
-            getPriorUnit().setTranslateX(newTranslateX);
-            getPriorUnit().setTranslateY(newTranslateY);
+                      
+            event.consume();
         });
         
         setPieceDropped((event) -> {
+            
+            if (Propagate == false) {
+                
+                Propagate = true;
+                event.consume();
+                return;
+            }
             
             double dx = ((MouseEvent) event).getSceneX();
             double dy = ((MouseEvent) event).getSceneY();
@@ -548,12 +599,17 @@ public class Board {
                 getField().add(getPriorUnit(), Square.getPoint().getX(), Square.getPoint().getY());
                 Square.setUnit(getPriorUnit());
                 
-                getMedia().playSong(getSong());
-            } else {
+                Turn ^= 1;
                 
+                getMedia().playSong(getSong());
+                setLandable(false);
+            } else {
+
                 getMedia().playSong(getWrong());
             }
-           
+                           
+            getPriorUnit().setCursor(Cursor.HAND);
+            
             getPriorUnit().setTranslateX(getTranslate().getDx());
             getPriorUnit().setTranslateY(getTranslate().getDy());
             
@@ -562,6 +618,23 @@ public class Board {
             getEffects().onExit(getPriorUnit());
            
             CleanHighlight();
+            
+            event.consume();
+        });
+        
+        setPieceEntered((event) -> {
+           
+            Piece Unit = (Piece) event.getSource();
+            
+            if (Unit.getColor() != Turn) {
+                
+                Unit.setCursor(Cursor.NONE);
+            } else {
+                
+                Unit.setCursor(Cursor.HAND);
+            }
+            
+            event.consume();
         });
     }
     
@@ -569,7 +642,6 @@ public class Board {
     private EventHandler PieceDragged;
     private EventHandler PieceDropped;
     private EventHandler PieceEntered;
-    private EventHandler PieceExited;
     
     private ImagePattern green, lightgreen;
     private ImagePattern red, lightred;
@@ -579,6 +651,7 @@ public class Board {
     private String song;
     private String wrong;
     
+    private boolean Propagate = true;
     private boolean Landable;
     private Coordinate Scene, Translate;
     private House PriorSquare;
@@ -642,18 +715,21 @@ public class Board {
         unit1.setOnMousePressed(PiecePressed);
         unit1.setOnMouseReleased(PieceDropped);
         unit1.setOnMouseDragged(PieceDragged);
+        unit1.setOnMouseEntered(PieceEntered);
         
         Piece unit2 = new Trump(5, 5, 1, getSquareHeight());
         this.Square[5][5].setUnit(unit2);
         unit2.setOnMousePressed(PiecePressed);
         unit2.setOnMouseReleased(PieceDropped);
         unit2.setOnMouseDragged(PieceDragged);
+        unit2.setOnMouseEntered(PieceEntered);
         getField().add(unit2, 5, 5);
         
         Piece unit3 = new Jhin(6, 6, 1, getSquareHeight());
         unit3.setOnMousePressed(PiecePressed);
         unit3.setOnMouseReleased(PieceDropped);
         unit3.setOnMouseDragged(PieceDragged);
+        unit3.setOnMouseEntered(PieceEntered);
         this.Square[6][6].setUnit(unit3);
         getField().add(unit3, 6, 6);
     }

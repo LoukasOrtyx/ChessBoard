@@ -8,6 +8,7 @@ package chessboard.elementary;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
+import javafx.scene.control.Label;
 import javafx.scene.effect.Effect;
 import javafx.scene.effect.Glow;
 import javafx.scene.effect.InnerShadow;
@@ -18,6 +19,22 @@ import javafx.util.Duration;
  * @author Lucas
  */
 public class Animations {
+
+    public double getVar3() {
+        return var3;
+    }
+
+    public void setVar3(double var3) {
+        this.var3 = var3;
+    }
+
+    public Timeline getAction2() {
+        return Action2;
+    }
+
+    public void setAction2(Timeline Action2) {
+        this.Action2 = Action2;
+    }
 
     public double getVar1() {
         return var1;
@@ -67,16 +84,16 @@ public class Animations {
         this.MinGlow = MinGlow;
     }
 
-    public Timeline getMotion() {
-        return Motion;
+    public Timeline getAction1() {
+        return Action1;
     }
 
-    public void setMotion(Timeline Motion) {
-        this.Motion = Motion;
+    public void setAction1(Timeline Action1) {
+        this.Action1 = Action1;
     }
     
-    private Timeline Motion;
-    private double var1, var2;
+    private Timeline Action1, Action2;
+    private double var1, var2, var3;
     private double MaxSize;
     private double MinSize;
     private double MaxGlow;
@@ -101,7 +118,7 @@ public class Animations {
         
         Unit.setEffect(new Glow(getVar2()));
         
-        setMotion(new  Timeline(new KeyFrame(Duration.seconds(1), (event) -> {
+        setAction1(new  Timeline(new KeyFrame(Duration.seconds(1), (event) -> {
             
             setVar1(getVar1() == getMaxSize()? getMinSize() : getMaxSize());
             setVar2(getVar2() == getMaxGlow()? getMinGlow() : getMaxGlow());
@@ -112,17 +129,32 @@ public class Animations {
             Unit.setEffect(new Glow(getVar2()));
         })));
         
-        getMotion().setCycleCount(Animation.INDEFINITE);
-        getMotion().play();
+        getAction1().setCycleCount(Animation.INDEFINITE);
+        getAction1().play();
     }
     
     public void onExit(Piece Unit) {
         
-        getMotion().stop();
+        getAction1().stop();
         
         Unit.setEffect(new Glow(getMinGlow()));
         
         Unit.setFitHeight(getMinSize());
         Unit.setFitWidth(getMinSize());
+    }
+    
+    public void BlinkLabel(Label Info) {
+        
+        setVar3(1);
+        
+        setAction2(new Timeline(new KeyFrame(Duration.millis(500), (event) -> {
+            
+            Info.setOpacity(getVar3());
+            
+            setVar3(getVar3() == 1? 0 : 1);
+        })));
+        
+        getAction2().setCycleCount(4);
+        getAction2().play();
     }
 }

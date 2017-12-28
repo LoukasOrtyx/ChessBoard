@@ -117,7 +117,7 @@ public class WindowBoardController implements Initializable {
     private Label Info;
     
     @FXML
-    private Label TrumpLabel;
+    private Label Marker;
     
     @FXML
     private ImageView Volume;
@@ -142,7 +142,7 @@ public class WindowBoardController implements Initializable {
         setInferiorTab();
         setUnitsMenu();
         
-        PlayBoard = new Board(Rows, Columns, SquareSize, SquareSize, Field, MainPane, getWindow(), Players, getInfo(), TrumpLabel);
+        PlayBoard = new Board(Rows, Columns, SquareSize, SquareSize, Field, MainPane, getWindow(), Players, getInfo(), Marker);
         
         Field.setLayoutY(MenuHeight);
         MainPane.getChildren().add(Field);
@@ -175,7 +175,7 @@ public class WindowBoardController implements Initializable {
     
     public void RestartBoard() {
         
-        PlayBoard = new Board(Rows, Columns, SquareSize, SquareSize, Field, MainPane, getWindow(), getPlayers(), getInfo(), TrumpLabel);
+        PlayBoard = new Board(Rows, Columns, SquareSize, SquareSize, Field, MainPane, getWindow(), getPlayers(), getInfo(), Marker);
     }
     
     public MenuBar setOptions() {
