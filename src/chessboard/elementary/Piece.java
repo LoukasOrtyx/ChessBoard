@@ -17,6 +17,14 @@ import javafx.scene.image.ImageView;
  */
 abstract class Piece extends ImageView {
 
+    public String getWrong() {
+        return Wrong;
+    }
+
+    public void setWrong(String Wrong) {
+        this.Wrong = Wrong;
+    }
+
     /**
      * @return the ImageSize
      */
@@ -49,28 +57,38 @@ abstract class Piece extends ImageView {
         this.Point = c;
     }
     
-    public void setShadow() {
-        this.Shadow = new InnerShadow();
+    public void setLMB(String Song) {
         
-        this.Shadow.setOffsetX(2.0f);
-        this.Shadow.setOffsetY(2.0f);
+        this.LMB = Song;
     }
     
-    public InnerShadow getShadow() {
-        return this.Shadow;
+    public String getLMB() {
+        
+        return this.LMB;
     }
     
+    public String getRMB() {
+        
+        return this.RMB;
+    }
     
-    private InnerShadow Shadow;
     private Coordinate Point;
+    private String LMB;
+    private String RMB;
+    private String Wrong;
+    
+    
     private double ImageSize;
     private int Color;
 
     public Piece(String Image_url) {
         
         super(Image_url);
+        
         setCursor(Cursor.HAND);
-        setEffect(Shadow);
+        
+        setLMB("/Songs/Click.mp3");
+        setWrong("/Songs/Error.mp3");
     }
     
     abstract List<List<Coordinate>> PlotPaths();

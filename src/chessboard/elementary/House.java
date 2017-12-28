@@ -5,8 +5,9 @@
  */
 package chessboard.elementary;
 
+import javafx.scene.effect.Glow;
+import javafx.scene.effect.InnerShadow;
 import javafx.scene.image.ImageView;
-import javafx.scene.paint.Color;
 import javafx.scene.paint.ImagePattern;
 import javafx.scene.shape.Rectangle;
 
@@ -16,6 +17,14 @@ import javafx.scene.shape.Rectangle;
  * @author Lucas
  */
 public class House extends Rectangle {
+
+    public Glow getGlow() {
+        return Glow;
+    }
+
+    public void setGlow(Glow Glow) {
+        this.Glow = Glow;
+    }
 
     public Wall getTwall() {
         return Twall;
@@ -56,6 +65,20 @@ public class House extends Rectangle {
     private Wall Twall;
     private Coordinate Point;
     private ImagePattern background;
+    private InnerShadow Shadow;
+    private Glow Glow;
+    
+    public void setShadow() {
+        
+        this.Shadow = new InnerShadow();
+
+        getShadow().setOffsetX(0.5f);
+        getShadow().setOffsetY(0.5f);
+    }
+
+    public InnerShadow getShadow() {
+        return this.Shadow;
+    }
     
     public House(int x, int y, double Width, double Height, int Colour) {
         
@@ -63,9 +86,15 @@ public class House extends Rectangle {
 
         ImageView image;
         
+        setShadow();
+        setGlow(new Glow(0.2));
+        
         setPoint(x, y);
         setUnit(null);
         setTwall(null);
+        
+        setEffect(getShadow());
+        ((InnerShadow) getEffect()).setInput(getGlow());
         
         if(Colour == 1) image = new ImageView("/Images/blackhouse.jpg");
         else image = new ImageView("/Images/whitehouse.jpeg");
@@ -81,7 +110,8 @@ public class House extends Rectangle {
         
         setBackground(new ImagePattern(image.getImage()));
         
-        setFill(this.background);
+        setFill(getBackground());
+        
     }
     
     public void setImagePattern(ImagePattern background) {

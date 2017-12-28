@@ -10,6 +10,7 @@ import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.scene.effect.Effect;
 import javafx.scene.effect.Glow;
+import javafx.scene.effect.InnerShadow;
 import javafx.util.Duration;
 
 /**
@@ -123,6 +124,5 @@ public class Animations {
         
         Unit.setFitHeight(getMinSize());
         Unit.setFitWidth(getMinSize());
-        
     }
 }

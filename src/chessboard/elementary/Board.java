@@ -1,10 +1,12 @@
 package chessboard.elementary;
 
+import chessboard.songPlayer;
 import java.util.ArrayList;
 import java.util.List;
 import javafx.event.EventHandler;
+import javafx.scene.Node;
 import javafx.scene.control.Label;
-import javafx.scene.effect.InnerShadow;
+import javafx.scene.effect.Glow;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
@@ -15,6 +17,42 @@ import javafx.scene.paint.ImagePattern;
 import javafx.stage.Window;
 
 public class Board {
+
+    public String getWrong() {
+        return wrong;
+    }
+
+    public void setWrong(String wrong) {
+        this.wrong = wrong;
+    }
+
+    public songPlayer getMedia() {
+        return media;
+    }
+
+    public String getSong() {
+        return song;
+    }
+
+    public void setSong(String song) {
+        this.song = song;
+    }
+
+    public boolean isLandable() {
+        return Landable;
+    }
+
+    public void setLandable(boolean Landable) {
+        this.Landable = Landable;
+    }
+
+    public House getGlowSquare() {
+        return GlowSquare;
+    }
+
+    public void setGlowSquare(House GlowSquare) {
+        this.GlowSquare = GlowSquare;
+    }
 
     public Piece getPriorUnit() {
         return PriorUnit;
@@ -148,10 +186,6 @@ public class Board {
         this.Highlighted = Highlighted;
     }
 
-    public void setShadow(InnerShadow Shadow) {
-        this.Shadow = Shadow;
-    }
-
     public House[][] getSquare() {
         return Square;
     }
@@ -271,17 +305,6 @@ public class Board {
         getField().getColumnConstraints().add(rc);
     }
     
-    public void setShadow() {
-        this.setShadow(new InnerShadow());
-        
-        this.getShadow().setOffsetX(1.0f);
-        this.getShadow().setOffsetY(1.0f);
-    }
-    
-    public InnerShadow getShadow() {
-        return this.Shadow;
-    }
-    
     public boolean HouseIsMovable(Coordinate Point) {
         
         int x = Point.getX();
@@ -296,6 +319,11 @@ public class Board {
         int y = Point.getY();
         
         return (x < getRows() && x > -1 && y < getColumns() && y > -1 && this.getSquare()[x][y].getUnit() != null && this.getSquare()[x][y].getUnit().getColor() != Color);
+    }
+    
+    public boolean HouseIsValid(House Square) {
+        
+        return (Square.getFill().equals(getLightgreen()) || Square.getFill().equals(getGreen()) || Square.getFill().equals(getRed()) || Square.getFill().equals(getLightred()));
     }
     
     public List<List<Coordinate>> ValidatePaths(List<List<Coordinate>> AllPaths) {
@@ -398,6 +426,14 @@ public class Board {
         }
     }
     
+    public House FindSquare(double dx, double dy) {
+        
+        int x = (int) (dx / getSquareHeight());
+        int y = (int) ((dy - 30) / getSquareHeight());
+        
+        return this.Square[x][y];
+    }
+    
     public void ShowMotions(Piece Unit) {
         
         List<List<Coordinate>> Captures = Unit.PlotCaptures();
@@ -437,16 +473,23 @@ public class Board {
         setBlack(new ImagePattern(image.getImage()));
     }
     
+    
     public void setMouseActions() {
-        
+       
         setPiecePressed((event) -> {
             
             setPriorUnit((Piece) event.getSource());
+            
+            setSong(getPriorUnit().getLMB());
+            setWrong(getPriorUnit().getWrong());
+            
+            getMedia().playSong(getSong());
             
             int x = getPriorUnit().getPoint().getX();
             int y = getPriorUnit().getPoint().getY();
             
             setPriorSquare(this.Square[x][y]);
+            setGlowSquare(this.Square[x][y]);
             
             getEffects().onSelection(getPriorUnit());
             
@@ -461,8 +504,27 @@ public class Board {
         
         setPieceDragged((event) -> {
             
-            double offsetX = ((MouseEvent) event).getSceneX() - getScene().getDx();
-            double offsetY = ((MouseEvent) event).getSceneY() - getScene().getDy();
+            double dx = ((MouseEvent) event).getSceneX();
+            double dy = ((MouseEvent) event).getSceneY();
+            
+            double offsetX = dx - getScene().getDx();
+            double offsetY = dy - getScene().getDy();
+            
+            House Square = FindSquare(dx, dy);
+            
+            if(Square !=  getGlowSquare()) {
+                
+                getGlowSquare().getShadow().setInput(getGlowSquare().getGlow());
+                setGlowSquare(Square);
+            }
+            
+            if(HouseIsValid(getGlowSquare())) {
+                
+                setLandable(true);
+                getGlowSquare().getShadow().setInput(new Glow(1));
+            } else {
+                setLandable(false);
+            }
             
             double newTranslateX = offsetX + getTranslate().getDx();
             double newTranslateY = offsetY + getTranslate().getDy();
@@ -473,11 +535,33 @@ public class Board {
         
         setPieceDropped((event) -> {
             
-           Piece Unit = (Piece) event.getSource();
+            double dx = ((MouseEvent) event).getSceneX();
+            double dy = ((MouseEvent) event).getSceneY();
            
-           getEffects().onExit(Unit);
+            House Square = FindSquare(dx, dy);
+            
+            if(Landable == true) {
+                
+                getField().getChildren().remove(getPriorUnit());
+                getPriorSquare().setUnit(null);
+                
+                getField().add(getPriorUnit(), Square.getPoint().getX(), Square.getPoint().getY());
+                Square.setUnit(getPriorUnit());
+                
+                getMedia().playSong(getSong());
+            } else {
+                
+                getMedia().playSong(getWrong());
+            }
            
-           CleanHighlight();
+            getPriorUnit().setTranslateX(getTranslate().getDx());
+            getPriorUnit().setTranslateY(getTranslate().getDy());
+            
+            getGlowSquare().getShadow().setInput(getGlowSquare().getGlow());
+            
+            getEffects().onExit(getPriorUnit());
+           
+            CleanHighlight();
         });
     }
     
@@ -491,12 +575,17 @@ public class Board {
     private ImagePattern red, lightred;
     private ImagePattern black, white;
     
+    private final songPlayer media = new songPlayer();
+    private String song;
+    private String wrong;
+    
+    private boolean Landable;
     private Coordinate Scene, Translate;
     private House PriorSquare;
+    private House GlowSquare;
     private Piece PriorUnit;
     private final Animations Effects = new Animations();
     private List<List<Coordinate>> Highlighted;
-    private InnerShadow Shadow;
     private AnchorPane Background;
     private double SquareHeight;
     private Label Info, Marker;
@@ -525,9 +614,7 @@ public class Board {
         setUser(players);
         
         setMouseActions();
-        setImagePatterns();
-        
-        setShadow();
+        setImagePatterns();       
         
         for (int x = 0; x < getRows(); x++) {
             
@@ -544,7 +631,6 @@ public class Board {
                     this.Square[x][y] = new House(x, y, getSquareHeight(), getSquareHeight(), 0);
                 }
                 
-                this.Square[x][y].setEffect(getShadow());
                 getField().add(this.Square[x][y], x, y);
             }
         }

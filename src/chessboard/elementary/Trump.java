@@ -14,6 +14,8 @@ import java.util.List;
  */
  public class Trump extends Piece {
 
+     
+     
     public int getLimit() {
         return limit;
     }
@@ -22,7 +24,7 @@ import java.util.List;
         this.limit = limit;
     }
      
-     private int limit;
+    private int limit;
 
     public Trump(int x, int y, int color, double ImageSize) {
         
