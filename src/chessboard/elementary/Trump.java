@@ -31,8 +31,11 @@ import java.util.List;
         super("/Images/trump.png");
          
         setImageSize(ImageSize);
+        setRMB("/Songs/Wall.mp3");
+        setLMB("/Songs/America.mp3");
         
         setLimit(0);
+        
         setFitHeight(getImageSize());
         setFitWidth(getImageSize());
         setColor(color);

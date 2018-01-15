@@ -22,6 +22,38 @@ import javafx.stage.Window;
 
 public class Board {
 
+    public ImageView getIcon() {
+        return Icon;
+    }
+
+    public void setIcon(ImageView Icon) {
+        this.Icon = Icon;
+    }
+
+    public EventHandler getAimFieldExited() {
+        return AimFieldExited;
+    }
+
+    public void setAimFieldExited(EventHandler AimFieldExited) {
+        this.AimFieldExited = AimFieldExited;
+    }
+
+    public EventHandler getAimFieldEntered() {
+        return AimFieldEntered;
+    }
+
+    public void setAimFieldEntered(EventHandler AimFieldEntered) {
+        this.AimFieldEntered = AimFieldEntered;
+    }
+
+    public EventHandler getAimFieldMoved() {
+        return AimFieldMoved;
+    }
+
+    public void setAimFieldMoved(EventHandler AimFieldMoved) {
+        this.AimFieldMoved = AimFieldMoved;
+    }
+
     public String getWrong() {
         return wrong;
     }
@@ -472,22 +504,105 @@ public class Board {
     
     public void setMouseActions() {
        
+        setAimFieldClick((event) -> {
+          
+            if (((MouseEvent) event).getButton() == MouseButton.PRIMARY) {
+            
+                double dx = ((MouseEvent) event).getSceneX();
+                double dy = ((MouseEvent) event).getSceneY();
+                
+                House Square = FindSquare(dx, dy);
+                
+               if (Square.getUnit() != null && Square.getUnit().getColor() != getPriorUnit().getColor()) {
+                  
+                  getIcon().setTranslateX(0);
+                  getIcon().setTranslateY(0);
+                  
+                  getField().getChildren().remove(getIcon());
+                  getField().add(getIcon(), 0, 0);
+                  
+                  getMedia().playSong("/Songs/jhin_shot.mp3", 1.0);
+                  getEffects().Shot(getPriorSquare(), Square, getIcon(), getField(), getSquares());
+               }
+            }
+            
+            event.consume();
+        });
+        
+        setAimFieldExited((event) -> {
+          
+            getField().setCursor(Cursor.DEFAULT);
+
+            event.consume();
+        });
+        
+        setAimFieldEntered((event) -> {
+          
+            Elipse = true;
+            getField().setCursor(Cursor.NONE);  
+            
+            event.consume();
+        });
+        
+        setAimFieldMoved((event) -> {
+            
+            double SceneX = ((MouseEvent) event).getSceneX();
+            double SceneY = ((MouseEvent) event).getSceneY();
+            
+            double AimX = getIcon().getLayoutX();
+            double AimY = getIcon().getLayoutY();
+
+            double dx = SceneX - AimX;
+            double dy = SceneY - AimY;
+            
+            getIcon().setTranslateX(dx - 25);
+            getIcon().setTranslateY(dy - 55);
+            
+            
+            event.consume();
+        });
+        
         setPiecePressed((event) -> {
             
             setPriorUnit((Piece) event.getSource());
             
-            if (((MouseEvent) event).getButton() == MouseButton.SECONDARY) {
+            int x = getPriorUnit().getPoint().getX();
+            int y = getPriorUnit().getPoint().getY();
+
+            setPriorSquare(this.Square[x][y]);
+            setGlowSquare(this.Square[x][y]);
+            
+            if (((MouseEvent) event).getButton() == MouseButton.SECONDARY && getPriorUnit().getColor() == getTurn()) {
                 
                 Propagate = false;
                 
                 if (getPriorUnit() instanceof Jhin) {
                     
+                    getPriorUnit().setCursor(Cursor.NONE);
+                    
+                    getField().addEventHandler(MouseEvent.MOUSE_CLICKED, getAimFieldClick());
+                    getField().addEventHandler(MouseEvent.MOUSE_ENTERED, getAimFieldEntered());
+                    getField().addEventHandler(MouseEvent.MOUSE_EXITED, getAimFieldExited());
+                    getField().addEventHandler(MouseEvent.MOUSE_MOVED, getAimFieldMoved());
+                    
+                    setIcon(((Jhin) getPriorUnit()).getAim());
+                    
+                    getField().add(getIcon(), getPriorSquare().getPoint().getX(), getPriorSquare().getPoint().getY());
+                    
+                    
+                    getField().setCursor(Cursor.NONE);
+                    
+                    
+                } else if (getPriorUnit() instanceof Trump){
                     
                     
                 } else {
                     
-                    
+                    event.consume();
+                    return;
                 }
+                
+                getMedia().playSong(getPriorUnit().getRMB());
                 
             } else {
                 
@@ -514,12 +629,6 @@ public class Board {
                 } else {
 
                     getMedia().playSong(getSong());
-
-                    int x = getPriorUnit().getPoint().getX();
-                    int y = getPriorUnit().getPoint().getY();
-
-                    setPriorSquare(this.Square[x][y]);
-                    setGlowSquare(this.Square[x][y]);
 
                     getEffects().onSelection(getPriorUnit());
 
@@ -626,7 +735,7 @@ public class Board {
            
             Piece Unit = (Piece) event.getSource();
             
-            if (Unit.getColor() != Turn) {
+            if (Unit.getColor() != Turn || Elipse == true) {
                 
                 Unit.setCursor(Cursor.NONE);
             } else {
@@ -638,6 +747,10 @@ public class Board {
         });
     }
     
+    private EventHandler AimFieldClick;
+    private EventHandler AimFieldExited;
+    private EventHandler AimFieldEntered;
+    private EventHandler AimFieldMoved;
     private EventHandler PiecePressed;
     private EventHandler PieceDragged;
     private EventHandler PieceDropped;
@@ -651,6 +764,8 @@ public class Board {
     private String song;
     private String wrong;
     
+    private ImageView Icon;
+    private boolean Elipse = false;
     private boolean Propagate = true;
     private boolean Landable;
     private Coordinate Scene, Translate;
@@ -680,6 +795,8 @@ public class Board {
         setBackground(mainPane);
         setStage(window);
         setField(field);
+        
+        getField().setCursor(Cursor.DEFAULT);
         
         setInfo(info);
         setMarker(marker);
@@ -732,5 +849,13 @@ public class Board {
         unit3.setOnMouseEntered(PieceEntered);
         this.Square[6][6].setUnit(unit3);
         getField().add(unit3, 6, 6);
+    }
+
+    public EventHandler getAimFieldClick() {
+        return AimFieldClick;
+    }
+
+    public void setAimFieldClick(EventHandler AimFieldClick) {
+        this.AimFieldClick = AimFieldClick;
     }
 }

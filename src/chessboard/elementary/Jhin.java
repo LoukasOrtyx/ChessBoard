@@ -7,6 +7,7 @@ package chessboard.elementary;
 
 import java.util.ArrayList;
 import java.util.List;
+import javafx.scene.image.ImageView;
 
 /**
  *
@@ -14,16 +15,35 @@ import java.util.List;
  */
 public class Jhin extends Piece {
 
-    private boolean bullet = true;
-
-    public boolean getBullet() {
-
-        return this.bullet;
+    public ImageView getAim() {
+        return Aim;
     }
 
-    public void setBullet(boolean Bullet) {
+    public void setAim(ImageView Aim) {
+        this.Aim = Aim;
+    }
 
-        this.bullet = Bullet;
+    public void setBulletImage(ImageView Bullet) {
+        this.Bullet = Bullet;
+    }
+    
+    public ImageView getBulletImage() {
+        
+        return this.Bullet;
+    }
+
+    private boolean Ammo;
+    private ImageView Aim;
+    private ImageView Bullet;
+
+    public boolean getAmmo() {
+
+        return this.Ammo;
+    }
+
+    public void setAmmo(boolean Bullet) {
+
+        this.Ammo = Bullet;
     }
 
     @Override
@@ -69,10 +89,16 @@ public class Jhin extends Piece {
     public Jhin(int x, int y, int color, double ImageSize) {
 
         super("/Images/jhin.png");
+        setBulletImage(new ImageView("/Images/Bullet.png"));
+        setAim(new ImageView("/Images/aim.png"));
+        
+        setLMB("/Songs/jhin.mp3");
+        setRMB("/Songs/JhinSpecial.mp3");
 
         setImageSize(ImageSize);
         setColor(color);
-
+        setAmmo(true);
+        
         setFitHeight(getImageSize());
         setFitWidth(getImageSize());
 

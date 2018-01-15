@@ -17,6 +17,10 @@ import javafx.scene.image.ImageView;
  */
 abstract class Piece extends ImageView {
 
+    public void setRMB(String RMB) {
+        this.RMB = RMB;
+    }
+
     public String getWrong() {
         return Wrong;
     }

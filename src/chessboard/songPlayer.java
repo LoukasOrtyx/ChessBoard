@@ -36,6 +36,23 @@ public class songPlayer {
         media.setVolume(0.2);
         media.play();
     }
+    
+    public void playSong(String url, double volume) {
+
+        Media song = null;
+
+        try {
+
+            song = new Media(getClass().getResource(url).toURI().toString());
+        } catch (URISyntaxException ex) {
+
+            Logger.getLogger(Board.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        media = new MediaPlayer(song);
+        media.setVolume(volume);
+        media.play();
+    }
 
     public void playSong(String url, int time) {
 
