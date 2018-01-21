@@ -3,10 +3,11 @@ package chessboard.elementary;
 import chessboard.songPlayer;
 import java.util.ArrayList;
 import java.util.List;
+import javafx.animation.Animation;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.event.EventHandler;
 import javafx.scene.Cursor;
-import javafx.scene.Node;
-import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.effect.Glow;
 import javafx.scene.image.ImageView;
@@ -19,8 +20,89 @@ import javafx.scene.layout.RowConstraints;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.ImagePattern;
 import javafx.stage.Window;
+import javafx.util.Duration;
 
 public class Board {
+
+    public double getTimeLineSpeed() {
+        return TimeLineSpeed;
+    }
+
+    public void setTimeLineSpeed(double TimeLineSpeed) {
+        this.TimeLineSpeed = TimeLineSpeed;
+    }
+
+    public double getSmokeOpacity() {
+        return SmokeOpacity;
+    }
+
+    public void setSmokeOpacity(double SmokeOpacity) {
+        this.SmokeOpacity = SmokeOpacity;
+    }
+
+    public ImageView getImageSmoke() {
+        return ImageSmoke;
+    }
+
+    public void setImageSmoke(ImageView ImageSmoke) {
+        this.ImageSmoke = ImageSmoke;
+    }
+
+    public Timeline getSmoke() {
+        return Smoke;
+    }
+
+    public void setSmoke(Timeline Smoke) {
+        this.Smoke = Smoke;
+    }
+
+    public Timeline getExplosion() {
+        return Explosion;
+    }
+
+    public void setExplosion(Timeline Explosion) {
+        this.Explosion = Explosion;
+    }
+
+    public Timeline getBurst() {
+        return Burst;
+    }
+
+    public void setBurst(Timeline Burst) {
+        this.Burst = Burst;
+    }
+
+    public double getMovX() {
+        return movX;
+    }
+
+    public void setMovX(double movX) {
+        this.movX = movX;
+    }
+
+    public double getMovY() {
+        return movY;
+    }
+
+    public void setMovY(double movY) {
+        this.movY = movY;
+    }
+
+    public double getAngle() {
+        return Angle;
+    }
+
+    public void setAngle(double Angle) {
+        this.Angle = Angle;
+    }
+
+    public double getB() {
+        return B;
+    }
+
+    public void setB(double B) {
+        this.B = B;
+    }
 
     public ImageView getIcon() {
         return Icon;
@@ -472,7 +554,7 @@ public class Board {
         Paths = ValidatePaths(Paths);
         
         Motions.addAll(Paths);
-        Motions.addAll(Captures);
+        Motions.addAll(Captures);  
         
         setHighlighted(Motions);
         
@@ -501,11 +583,133 @@ public class Board {
         setBlack(new ImagePattern(image.getImage()));
     }
     
+    public void CalculateAngle(Coordinate Destiny, Coordinate Origin) {
+
+        if ((double) Destiny.getX() - Origin.getX() == 0) {
+            
+            setAngle(0);
+        } else {
+            
+            double Angle = (((double) Destiny.getY() - Origin.getY()) / ((double) Destiny.getX() - Origin.getX()));
+            setAngle(Angle);
+        } 
+    }
+
+    public void CalculateB(Coordinate Point) {
+
+        double b = ((Point.getY() * 50) - getAngle() * (Point.getX() * 50));
+
+        setB(b);
+    }
+    
+    public void Shot(House PriorSquare, House TargetSquare) {
+        
+        setImageSmoke(new ImageView("/Images/smoke.gif"));
+        
+        getField().add(getImageSmoke(), PriorSquare.getPoint().getX(), PriorSquare.getPoint().getY());
+        
+        getImageSmoke().setOpacity(getSmokeOpacity());
+        getImageSmoke().setTranslateY(-5);
+        
+        getEffects().SmokeEntropy(getImageSmoke());
+        
+        setSmoke(new Timeline(new KeyFrame(Duration.millis(1500), (event) -> {
+            
+            getField().getChildren().remove(getImageSmoke());
+        })));
+        
+        getSmoke().play();
+        
+        getIcon().setTranslateX(PriorSquare.getLayoutX());
+        getIcon().setTranslateY(PriorSquare.getLayoutY());
+
+        System.err.println("Xo: " + PriorSquare.getLayoutX());
+        System.err.println("Yo: " +PriorSquare.getLayoutY());
+        
+        System.err.println("Xf: " + TargetSquare.getLayoutX());
+        System.err.println("Yf: " + TargetSquare.getLayoutY());
+        
+        setMovX(PriorSquare.getPoint().getX() * 50);
+        setMovY(PriorSquare.getPoint().getY() * 50);
+
+        setAdd(PriorSquare.getPoint().getX() >= TargetSquare.getPoint().getX() ? -1 : 1);
+
+        Jhin Unit = ((Jhin) PriorSquare.getUnit());
+
+        CalculateAngle(TargetSquare.getPoint(), PriorSquare.getPoint());
+        CalculateB(PriorSquare.getPoint());
+        
+        System.err.println("B: " + B);
+        System.err.println("A: " + Math.toDegrees(Math.atan(getAngle())));
+
+       getIcon().setRotate(Math.toDegrees(Math.atan(getAngle())));
+        
+        ImageView bullet = new ImageView(Unit.getBulletImage().getImage());
+        getIcon().setImage(bullet.getImage());
+        
+    //    bullet.setRotate(90);
+        
+        
+        System.err.println("(" + PriorSquare.getPoint().getX() + ", " + PriorSquare.getPoint().getY() + ") to (" + TargetSquare.getPoint().getX() + ", " + TargetSquare.getPoint().getY() + ")");
+    
+        setBurst(new Timeline(new KeyFrame(Duration.millis(2), (event) -> {
+
+            setMovX(getMovX() + getAdd());
+            setMovY(getMovX() * getAngle() + getB());
+
+            contador++;
+            
+            //System.err.println(getMovX());
+            //System.err.println(getMovY());
+
+            getIcon().setTranslateX(getMovX());
+            getIcon().setTranslateY(getMovY());
+
+            int x = (int) getIcon().getTranslateX() / 50;
+            int y = (int) getIcon().getTranslateY() / 50;
+
+            if (getSquare()[x][y].getUnit() != null && getPriorSquare().getUnit().getColor() != getSquare()[x][y].getUnit().getColor()) {
+
+                System.err.println(getIcon().getTranslateX());
+                System.err.println(getIcon().getTranslateY());
+                
+                System.err.println(contador + "vezes");
+                getBurst().stop();
+
+                Piece HitUnit = getSquare()[x][y].getUnit();
+
+                getField().getChildren().remove(HitUnit);
+
+                getSquare()[x][y].setUnit(null);
+
+                ImageView explosion = new ImageView("/Images/explosion.gif");
+
+                getField().add(explosion, x, y);
+
+                FieldEvents = false;
+
+                getMedia().playSong("/Songs/Explosion.mp3");
+
+                setExplosion(new Timeline(new KeyFrame(Duration.seconds(1), (ev) -> {
+
+                    getField().getChildren().remove(explosion);
+                })));
+
+                getField().getChildren().remove(getIcon());
+                getExplosion().play();
+            }
+        })));
+        
+        getBurst().setCycleCount(Animation.INDEFINITE);
+        getBurst().play();
+    }
     
     public void setMouseActions() {
        
         setAimFieldClick((event) -> {
           
+            System.err.println("1");
+            
             if (((MouseEvent) event).getButton() == MouseButton.PRIMARY) {
             
                 double dx = ((MouseEvent) event).getSceneX();
@@ -522,7 +726,8 @@ public class Board {
                   getField().add(getIcon(), 0, 0);
                   
                   getMedia().playSong("/Songs/jhin_shot.mp3", 1.0);
-                  getEffects().Shot(getPriorSquare(), Square, getIcon(), getField(), getSquares());
+                  
+                   Shot(getPriorSquare(), Square);
                }
             }
             
@@ -531,6 +736,8 @@ public class Board {
         
         setAimFieldExited((event) -> {
           
+            
+            System.err.println("2");
             getField().setCursor(Cursor.DEFAULT);
 
             event.consume();
@@ -538,6 +745,7 @@ public class Board {
         
         setAimFieldEntered((event) -> {
           
+            System.err.println("3");
             Elipse = true;
             getField().setCursor(Cursor.NONE);  
             
@@ -546,19 +754,34 @@ public class Board {
         
         setAimFieldMoved((event) -> {
             
-            double SceneX = ((MouseEvent) event).getSceneX();
-            double SceneY = ((MouseEvent) event).getSceneY();
+            System.err.println(FieldEvents);
             
-            double AimX = getIcon().getLayoutX();
-            double AimY = getIcon().getLayoutY();
+            if (FieldEvents == false) {
+                
+                System.err.println("is false");
+                getField().removeEventHandler(MouseEvent.MOUSE_CLICKED, getAimFieldClick());
+                getField().removeEventHandler(MouseEvent.MOUSE_ENTERED, getAimFieldEntered());
+                getField().removeEventHandler(MouseEvent.MOUSE_EXITED, getAimFieldExited());
+                getField().removeEventHandler(MouseEvent.MOUSE_MOVED, getAimFieldMoved());
+                
+                getField().setCursor(Cursor.DEFAULT);
+                
+                return;
+            } else {
+                
+                double SceneX = ((MouseEvent) event).getSceneX();
+                double SceneY = ((MouseEvent) event).getSceneY();
 
-            double dx = SceneX - AimX;
-            double dy = SceneY - AimY;
-            
-            getIcon().setTranslateX(dx - 25);
-            getIcon().setTranslateY(dy - 55);
-            
-            
+                double AimX = getIcon().getLayoutX();
+                double AimY = getIcon().getLayoutY();
+
+                double dx = SceneX - AimX;
+                double dy = SceneY - AimY;
+
+                getIcon().setTranslateX(dx - 25);
+                getIcon().setTranslateY(dy - 55);
+            }
+                
             event.consume();
         });
         
@@ -576,9 +799,13 @@ public class Board {
                 
                 Propagate = false;
                 
-                if (getPriorUnit() instanceof Jhin) {
+                if (getPriorUnit() instanceof Jhin && ((Jhin) getPriorUnit()).getAmmo() != false) {
                     
                     getPriorUnit().setCursor(Cursor.NONE);
+                    
+                    ((Jhin) getPriorUnit()).setAmmo(false);
+                    
+                    FieldEvents = true;
                     
                     getField().addEventHandler(MouseEvent.MOUSE_CLICKED, getAimFieldClick());
                     getField().addEventHandler(MouseEvent.MOUSE_ENTERED, getAimFieldEntered());
@@ -589,10 +816,7 @@ public class Board {
                     
                     getField().add(getIcon(), getPriorSquare().getPoint().getX(), getPriorSquare().getPoint().getY());
                     
-                    
-                    getField().setCursor(Cursor.NONE);
-                    
-                    
+                    getField().setCursor(Cursor.NONE);      
                 } else if (getPriorUnit() instanceof Trump){
                     
                     
@@ -747,10 +971,23 @@ public class Board {
         });
     }
     
-    private EventHandler AimFieldClick;
-    private EventHandler AimFieldExited;
-    private EventHandler AimFieldEntered;
-    private EventHandler AimFieldMoved;
+    private int contador = 0;
+    
+    private double TimeLineSpeed;
+    private double SmokeOpacity;
+    private ImageView ImageSmoke;
+    private Timeline Smoke;
+    private Timeline Explosion;
+    private Timeline Burst;
+    private double Add;
+    private double movX, movY;
+    private double Angle;
+    private double B;
+    
+    private EventHandler<MouseEvent> AimFieldClick;
+    private EventHandler<MouseEvent> AimFieldExited;
+    private EventHandler<MouseEvent> AimFieldEntered;
+    private EventHandler<MouseEvent> AimFieldMoved;
     private EventHandler PiecePressed;
     private EventHandler PieceDragged;
     private EventHandler PieceDropped;
@@ -764,6 +1001,7 @@ public class Board {
     private String song;
     private String wrong;
     
+    private boolean FieldEvents = false;
     private ImageView Icon;
     private boolean Elipse = false;
     private boolean Propagate = true;
@@ -836,6 +1074,7 @@ public class Board {
         
         Piece unit2 = new Trump(5, 5, 1, getSquareHeight());
         this.Square[5][5].setUnit(unit2);
+        
         unit2.setOnMousePressed(PiecePressed);
         unit2.setOnMouseReleased(PieceDropped);
         unit2.setOnMouseDragged(PieceDragged);
@@ -843,6 +1082,7 @@ public class Board {
         getField().add(unit2, 5, 5);
         
         Piece unit3 = new Jhin(6, 6, 1, getSquareHeight());
+        
         unit3.setOnMousePressed(PiecePressed);
         unit3.setOnMouseReleased(PieceDropped);
         unit3.setOnMouseDragged(PieceDragged);
@@ -857,5 +1097,13 @@ public class Board {
 
     public void setAimFieldClick(EventHandler AimFieldClick) {
         this.AimFieldClick = AimFieldClick;
+    }
+
+    public double getAdd() {
+        return Add;
+    }
+
+    public void setAdd(double Add) {
+        this.Add = Add;
     }
 }

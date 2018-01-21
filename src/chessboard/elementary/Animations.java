@@ -11,7 +11,6 @@ import javafx.animation.Timeline;
 import javafx.scene.control.Label;
 import javafx.scene.effect.Glow;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.GridPane;
 import javafx.util.Duration;
 
 /**
@@ -20,44 +19,12 @@ import javafx.util.Duration;
  */
 public class Animations {
 
-    public House[][] getSquare() {
-        return Square;
+    public ImageView getIcon() {
+        return Icon;
     }
 
-    public void setSquare(House[][] Square) {
-        this.Square = Square;
-    }
-
-    public GridPane getField() {
-        return Field;
-    }
-
-    public void setField(GridPane Field) {
-        this.Field = Field;
-    }
-
-    public double getAngle() {
-        return Angle;
-    }
-
-    public void setAngle(double Angle) {
-        this.Angle = Angle;
-    }
-
-    public double getB() {
-        return B;
-    }
-
-    public void setB(double B) {
-        this.B = B;
-    }
-
-    public ImageView getBullet() {
-        return Bullet;
-    }
-
-    public void setBullet(ImageView Bullet) {
-        this.Bullet = Bullet;
+    public void setIcon(ImageView Icon) {
+        this.Icon = Icon;
     }
 
     public double getVar3() {
@@ -132,21 +99,13 @@ public class Animations {
         this.Action1 = Action1;
     }
     
-    private ImageView Bullet;
-    private double Angle;
-    private double B;
-    
+    private ImageView Icon;
     private Timeline Action1, Action2;
     private double var1, var2, var3;
     private double MaxSize;
     private double MinSize;
     private double MaxGlow;
     private double MinGlow;
-    
-    private GridPane Field;
-    private House[][] Square;
-    
-    private House Prior;
     
     public Animations() {};
     
@@ -205,95 +164,20 @@ public class Animations {
         
         getAction2().setCycleCount(4);
         getAction2().play();
-    }
+    } 
     
-    public void CalculateAngle(Coordinate Destiny, Coordinate Origin) {
+    public void SmokeEntropy(ImageView Smoke) {
         
-        double Angle = (((double) Destiny.getY() - Origin.getY()) / ( (double) Destiny.getX() - Origin.getX()));
+        setVar1(1);
+        setIcon(Smoke);
         
-        setAngle(Angle);
-    }
-    
-    public void CalculateB(Coordinate Point) {
-        
-        double b = ((Point.getY() * 50) - getAngle() * (Point.getX() * 50));
-        
-        setB(b);
-    }
-    
-    public void Shot(House PriorSquare, House TargetSquare, ImageView Bullet, GridPane Field, House[][] Square) {
-        
-        
-        
-        setBullet(Bullet);
-       
-        setField(Field);
-        
-        Prior = PriorSquare;
-        
-        setSquare(Square);
-        
-        getBullet().setTranslateX(PriorSquare.getLayoutX());
-        getBullet().setTranslateY(PriorSquare.getLayoutY());
-        
-        setVar1(PriorSquare.getPoint().getX() * 50);
-        setVar2(PriorSquare.getPoint().getY() * 50);
-        
-        setVar3(PriorSquare.getPoint().getX() >= TargetSquare.getPoint().getX()? -1 : 1);
-        
-        Jhin Unit = ((Jhin) PriorSquare.getUnit());
-        
-        ImageView bullet = new ImageView(Unit.getBulletImage().getImage());
-        bullet.setRotate(-90);
-        
-        
-        getBullet().setImage(bullet.getImage());
-        
-        CalculateAngle(TargetSquare.getPoint(), PriorSquare.getPoint()); 
-        CalculateB(TargetSquare.getPoint());
-        
-        getBullet().setRotate(Math.toDegrees(Math.atan(getAngle())));
-        
-        System.err.println(getB());
-        System.err.println(getAngle());
-        
-        
-        setAction1(new Timeline(new KeyFrame(Duration.millis(2), (event) -> {
+        setAction1(new Timeline(new KeyFrame(Duration.ONE, (event) -> {
             
-            setVar1(getVar1() + getVar3());
-            setVar2(getVar1() * getAngle() + getB());
-            
-            System.err.println(getVar1());
-            System.err.println(getVar2());
-            
-            getBullet().setTranslateX(getVar1());
-            getBullet().setTranslateY(getVar2());
-            
-            int x = (int) getBullet().getTranslateX() / 50;
-            int y = (int) getBullet().getTranslateY() / 50;
-            
-            if (getSquare()[x][y].getUnit() != null && Prior.getUnit().getColor() != getSquare()[x][y].getUnit().getColor()) {
-                
-                getAction1().stop();
-                
-                Piece HitUnit = getSquare()[x][y].getUnit();
-                
-                getField().getChildren().remove(HitUnit);
-                
-                ImageView explosion = new ImageView("/Images/explosion.gif");
-                
-                getField().add(explosion, x, y);
-                
-                setAction2(new Timeline(new KeyFrame(Duration.seconds(1), (ev) -> {
-                    
-                    getField().getChildren().remove(explosion);
-                })));
-                
-                getAction2().play();
-            }
+            setVar1(getVar1() - 0.001);
+            getIcon().setOpacity(getVar1());
         })));
         
-        getAction1().setCycleCount(Animation.INDEFINITE);
+        getAction1().setCycleCount(1000);
         getAction1().play();
     }
 }
